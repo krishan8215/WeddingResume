@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bio-Data Builder</title>
+    <style>
+        /* All CSS from previous version is here */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&amp;family=Lora:ital,wght@0,400;0,700;1,400&amp;family=Merriweather:wght@300;400;700&amp;family=Playfair+Display:wght@400;700&amp;family=Poppins:wght@300;400;600;700&amp;family=Lato:wght@300;400;700&amp;display=swap');
+        :root { --primary-color: #2c3e50; }
+        body { font-family: 'Roboto', sans-serif; background-color: #f5f7fa; color: #333; margin: 0; padding: 20px; line-height: 1.6; }
+        .container { display: flex; flex-wrap: wrap; gap: 30px; max-width: 1600px; margin: auto; }
+        .form-panel, .preview-panel { flex: 1; min-width: 480px; }
+        .form-panel { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.07); }
+        .form-block { border: 1px solid #e1e8ed; padding: 20px; border-radius: 8px; margin-bottom: 25px; position: relative; }
+        .form-panel h2, .preview-panel h2 { text-align: center; color: #1c2541; border-bottom: 2px solid #f0f4f7; padding-bottom: 10px; margin-top:0; }
+        .field-group { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
+        .field-group label, .custom-field .label-input { flex: 0 0 160px; font-weight: 700; }
+        .field-group .value-container { flex-grow: 1; }
+        .remove-field-btn { background: none; border: none; cursor: pointer; color: #c0392b; font-weight: bold; font-size: 22px; padding: 0 10px; line-height: 1; }
+        input[type="text"], select, textarea, input[type="file"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; margin-bottom: 10px; }
+        .section-title-input { font-size: 20px; font-weight: bold; color: #2c3e50; border: none; border-bottom: 2px dashed #ccc; padding: 10px 0; margin-bottom: 15px; }
+        .remove-section-btn { position: absolute; top: 15px; right: 15px; background-color: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; line-height: 30px; text-align: center; }
+        .action-button { background-color: #16a085; color:white; border:none; padding: 12px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
+        #resumePreview { background: #fff; padding: 50px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .resume-header { display: flex; gap: 30px; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #ecf0f1; padding-bottom: 25px; }
+        .resume-header.align-center { flex-direction: column; }
+        .resume-header.align-right { flex-direction: row-reverse; }
+        .resume-header.no-photo .profile-pic-container { display: none; }
+        .header-text { flex-grow: 1; text-align: center; }
+        #previewImage { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 5px solid var(--primary-color); }
+        #previewHeading { font-size: 2.6em; color: var(--primary-color); margin: 0; font-weight: 700; }
+        #resumePreview h3 { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; margin-top: 30px; font-size: 1.6em; }
+        #resumePreview p { font-size: 1.1em; margin: 12px 0; display: flex; }
+        #resumePreview strong { min-width: 180px; font-weight: 700; }
+        #resumePreview p span { font-weight: 700; color: #2c3e50; }
+        @media (max-width: 900px) { .container { padding: 0; flex-direction: column; } .form-panel, .preview-panel { min-width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- FORM PANEL -->
+        <div class="form-panel">
+            <h2>Bio-Data Builder</h2>
+            <div id="generalControls"></div><form id="resumeForm"></form>
+            <button id="addNewSectionBtn" class="action-button">+ Add New Section</button>
+            <button id="downloadBtn" class="action-button" style="background-color:#c0392b;">Download as PDF</button>
+        </div>
+        <!-- PREVIEW PANEL -->
+        <div class="preview-panel">
+            <h2>Live Preview</h2><div id="resumePreview"></div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // Your complete, polished JavaScript code from the final version goes here.
+        // It's the same script, nothing changes here.
+        // I am including it for completeness.
+        //<![CDATA[
+        document.addEventListener('DOMContentLoaded', () => {
+            const generalControlsContainer = document.getElementById('generalControls'); const resumeForm = document.getElementById('resumeForm'); const resumePreview = document.getElementById('resumePreview');
+            const initialStructure = [ { id: 'personal', title: 'Personal Details', fields: ['Full Name', 'Date of Birth', 'Complexion', 'Height', 'Education', 'Place of Birth'] }, { id: 'family', title: 'Family Details', fields: ["Father's Name", "Father's Occupation", "Mother's Name", "Mother's Occupation"] }, { id: 'contact', title: 'Contact Details', fields: ['Mobile Number', 'Email Address'] }, { id: 'address', title: 'Address', fields: [{ label: 'Current Address', type: 'textarea' }] }, ];
+            function buildInitialLayout() {
+                generalControlsContainer.innerHTML = `<div class="form-block"><h3>Design Controls</h3><label>Theme Color:</label><input type="color" id="themeColor" value="#2c3e50"><label style="margin-left:20px;">Font Style:</label><select id="fontSelector" style="width:200px;"><option value="'Roboto', sans-serif">Roboto</option><option value="'Lora', serif">Lora (Elegant)</option><option value="'Merriweather', serif">Merriweather (Classic)</option><option value="'Playfair Display', serif">Playfair Display</option><option value="'Poppins', sans-serif">Poppins (Modern)</option><option value="'Lato', sans-serif">Lato (Professional)</option></select></div><div class="form-block"><h3>Heading & Photo</h3><label>Main Heading:</label><input type="text" id="resumeHeading" value="Matrimonial Bio-Data"><label>Upload Picture:</label><input type="file" id="profilePic" accept="image/*"><label>Photo Alignment:</label><div><input type="radio" name="photoAlignment" value="left" id="a-l"><label for="a-l">Left</label><input type="radio" name="photoAlignment" value="center" id="a-c"><label for="a-c">Center</label><input type="radio" name="photoAlignment" value="right" id="a-r"><label for="a-r">Right</label><input type="radio" name="photoAlignment" value="none" id="a-n" checked><label for="a-n">No Photo</label></div></div>`;
+                resumePreview.innerHTML = `<div class="resume-header no-photo"><div class="profile-pic-container"><img id="previewImage" style="display:none;"></div><div class="header-text"><h1 id="previewHeading"></h1></div></div><div class="details" id="previewDetailsContainer"></div>`;
+                initialStructure.forEach(section => createSection(section.id, section.title, section.fields)); updateLivePreview();
+            }
+            function createSection(id, title, fields = []) {
+                const block = document.createElement('div'); block.className = 'form-block'; block.dataset.sectionId = id; let fieldsHTML = '';
+                fields.forEach(field => { const label = typeof field === 'string' ? field : field.label; const type = typeof field === 'object' ? field.type : 'text'; fieldsHTML += createFieldHTML(label, type); });
+                block.innerHTML = `<button type="button" class="remove-section-btn" title="Remove section">×</button><input type="text" class="section-title-input" value="${title}"><div class="fields-container">${fieldsHTML}</div><button type="button" class="add-field-btn action-button" style="background-color: #2980b9; font-size:14px; padding: 8px;">+ Add Field</button>`;
+                resumeForm.appendChild(block); document.getElementById('previewDetailsContainer').insertAdjacentHTML('beforeend', `<div id="preview-${id}"></div>`);
+            }
+            function createFieldHTML(label, type = 'text') { const inputElement = type === 'textarea' ? `<textarea data-label="${label}" rows="3"></textarea>` : `<input type="text" data-label="${label}">`; return `<div class="field-group"><div class="field-label"><label>${label}:</label></div><div class="value-container">${inputElement}</div><button type="button" class="remove-field-btn" title="Remove field">×</button></div>`; }
+            function createCustomFieldHTML() { return `<div class="field-group custom-field"><div class="label-input"><input type="text" placeholder="Field Label"></div><div class="value-container"><input type="text" placeholder="Value"></div><button type="button" class="remove-field-btn">×</button></div>`; }
+            const debounce = (func, delay) => { let timeoutId; return (...args) => { clearTimeout(timeoutId); timeoutId = setTimeout(() => func.apply(this, args), delay); }; };
+            function updateLivePreview() {
+                document.documentElement.style.setProperty('--primary-color', document.getElementById('themeColor').value);
+                resumePreview.style.fontFamily = document.getElementById('fontSelector').value; document.getElementById('previewHeading').innerText = document.getElementById('resumeHeading').value || 'Bio-Data';
+                const alignment = document.querySelector('input[name="photoAlignment"]:checked').value; const header = resumePreview.querySelector('.resume-header');
+                const picInput = document.getElementById('profilePic'); const previewImage = document.getElementById('previewImage'); header.className = 'resume-header'; header.classList.add(alignment !== 'none' ? `align-${alignment}` : 'no-photo');
+                if(picInput.files[0]) { previewImage.src = URL.createObjectURL(picInput.files[0]); } previewImage.style.display = alignment !== 'none' && picInput.files[0] ? 'block' : 'none';
+                document.querySelectorAll('#resumeForm .form-block').forEach(block => {
+                    const sectionId = block.dataset.sectionId; if (!sectionId) return; const previewSection = document.getElementById(`preview-${sectionId}`); if (!previewSection) return; const title = block.querySelector('.section-title-input').value; let sectionContent = '';
+                    block.querySelectorAll('.field-group').forEach(group => { let label, value; if (group.classList.contains('custom-field')) { label = group.querySelector('.label-input input').value; value = group.querySelector('.value-container input').value; } else { const inputEl = group.querySelector('input, textarea'); label = inputEl.dataset.label; value = inputEl.value; } if (label && value) sectionContent += `<p><strong>${label}:</strong> <span>${value.replace(/\n/g, '<br/>')}</span></p>`; });
+                    if (sectionContent) { previewSection.innerHTML = `<h3>${title}</h3>` + sectionContent; } else { previewSection.innerHTML = ''; }
+                });
+            }
+            const debouncedUpdate = debounce(updateLivePreview, 250);
+            document.querySelector('.form-panel').addEventListener('input', debouncedUpdate);
+            document.querySelector('.form-panel').addEventListener('change', updateLivePreview);
+            resumeForm.addEventListener('click', e => { if (e.target.classList.contains('add-field-btn')) { e.target.previousElementSibling.insertAdjacentHTML('beforeend', createCustomFieldHTML()); e.target.previousElementSibling.lastElementChild.querySelector('.label-input input').focus(); } if (e.target.classList.contains('remove-field-btn')) { if (confirm('Are you sure you want to delete this field?')) { e.target.closest('.field-group').remove(); updateLivePreview(); } } if (e.target.classList.contains('remove-section-btn')) { if (confirm('Are you sure you want to delete this entire section?')) { const sectionId = e.target.closest('.form-block').dataset.sectionId; document.getElementById(`preview-${sectionId}`).remove(); e.target.closest('.form-block').remove(); updateLivePreview(); } } });
+            document.getElementById('addNewSectionBtn').addEventListener('click', () => { createSection('custom-' + Date.now(), 'New Section', []); resumeForm.lastElementChild.querySelector('.section-title-input').focus(); updateLivePreview(); });
+            document.getElementById('downloadBtn').addEventListener('click', () => { const { jsPDF } = window.jspdf; const resume = document.getElementById('resumePreview'); const originalShadow = resume.style.boxShadow; resume.style.boxShadow = 'none'; html2canvas(resume, { scale: 3, useCORS: true }).then(canvas => { resume.style.boxShadow = originalShadow; const imgData = canvas.toDataURL('image/jpeg', 1.0); const pdf = new jsPDF('p', 'mm', 'a4'); const pageWidth = pdf.internal.pageSize.getWidth(), pageHeight = pdf.internal.pageSize.getHeight(); const imgProps = pdf.getImageProperties(imgData), contentHeight = (imgProps.height * pageWidth) / imgProps.width; if (contentHeight <= pageHeight) { pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, contentHeight); } else { let heightLeft = contentHeight, position = 0; pdf.addImage(imgData, 'JPEG', 0, position, pageWidth, contentHeight); heightLeft -= pageHeight; while (heightLeft > 0) { position -= pageHeight; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, pageWidth, contentHeight); heightLeft -= pageHeight; } } pdf.save('My-Bio-Data.pdf'); }); });
+            buildInitialLayout();
+        });
+        //]]>
+    </script>
+</body>
+</html>
